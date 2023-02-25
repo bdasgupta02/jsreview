@@ -1,0 +1,23 @@
+{
+  "name": "sv-core-rules",
+  "version": "1.0.0",
+  "description": "Rule-based analysis for ACR tasks",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bdasgupta02/jsreview.git"
+  },
+  "keywords": [
+    "ACR",
+    "JavaScript"
+  ],
+  "author": "Bikramjit Dasgupta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bdasgupta02/jsreview/issues"
+  },
+  "homepage": "https://github.com/bdasgupta02/jsreview#readme"
+}
