@@ -1,0 +1,14 @@
+{
+  "name": "sv-app",
+  "version": "1.0.0",
+  "description": "Backend server for JSReview with the core engine inside",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "keywords": [
+    "JavaScript"
+  ],
+  "author": "Bikramjit Dasgupta",
+  "license": "ISC"
+}

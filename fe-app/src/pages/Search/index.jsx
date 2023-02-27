@@ -11,11 +11,19 @@ import { useNavigate } from 'react-router-dom'
 const Search = () => {
     const navigate = useNavigate()
 
-    const [url, setUrl] = useState('https://github.com/bdasgupta02/luminus2')
+    const [url, setUrl] = useState('')
     const [isLoading, setLoading] = useState(false)
 
     const onScan = () => {
         setLoading(true)
+
+        if (!url) {
+            setLoading(false)
+            return
+        }
+
+        // check if a valid url, and is a public github repository
+        // show error otherwise
 
         try {
             navigate('/overview')
@@ -35,9 +43,9 @@ const Search = () => {
                     <p style={{ margin: '0px' }}>
                         This is to test out the analytics while in development. Later version will include
                         support for pull request code reviews. Please enter a link of a GitHub project below
-                        which includes [.js/.jsx] files (for instance:{' '}
-                        <a href="https://github.com/bdasgupta02/luminus2" target="_blank">
-                            https://github.com/bdasgupta02/luminus2
+                        which includes .js files (for instance:{' '}
+                        <a href="about:blank" target="_blank">
+                            put link here
                         </a>
                         )
                     </p>

@@ -4,8 +4,7 @@ import { AtlaskitThemeProvider } from '@atlaskit/theme'
 import { BrowserRouter as Router, Routes, Route, useLocation, Link, useNavigate } from 'react-router-dom'
 import { AtlassianNavigation, PrimaryButton } from '@atlaskit/atlassian-navigation'
 import { PageLayout, Content, TopNavigation } from '@atlaskit/page-layout'
-import { token } from '@atlaskit/tokens'
-import { B50, N50, B500 } from '@atlaskit/theme/colors'
+import { B50, N50, B500, N0, B400 } from '@atlaskit/theme/colors'
 import EmptyState from '@atlaskit/empty-state'
 import Button from '@atlaskit/button'
 import constants from './constants/constants'
@@ -76,7 +75,7 @@ const NavBar = () => {
             route: '/bugs',
         },
         {
-            name: 'Code Smells',
+            name: 'Smells',
             route: '/smells',
         },
         {
@@ -84,8 +83,16 @@ const NavBar = () => {
             route: '/maintainability',
         },
         {
+            name: 'Vulnerabilities',
+            route: '/vulnerabilities',
+        },
+        {
             name: 'Files',
             route: '/files',
+        },
+        {
+            name: 'Pull Requests',
+            route: '/pulls',
         },
     ]
 
@@ -97,7 +104,8 @@ const NavBar = () => {
                     <Link key={e.route} to={e.route} style={{ textDecoration: 'none' }}>
                         <PrimaryButton
                             style={{
-                                color: pathname && pathname === e.route ? token('color.text.brand') : null,
+                                color: pathname && pathname === e.route ? N0 : null,
+                                backgroundColor: pathname && pathname === e.route ? B400 : null,
                             }}>
                             {e.name}
                         </PrimaryButton>
@@ -121,7 +129,9 @@ const InnerRouter = () => {
             )}
             <Content>
                 <Routes>
+                    <Route path="/pulls" element={<Incomplete />} />
                     <Route path="/files" element={<Incomplete />} />
+                    <Route path="/vulnerabilities" element={<Incomplete />} />
                     <Route path="/maintainability" element={<Incomplete />} />
                     <Route path="/smells" element={<Incomplete />} />
                     <Route path="/bugs" element={<Incomplete />} />
