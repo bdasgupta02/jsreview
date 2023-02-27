@@ -1,14 +1,30 @@
 {
-  "name": "sv-app",
-  "version": "1.0.0",
-  "description": "Backend server for JSReview with the core engine inside",
-  "main": "index.js",
-  "scripts": {
-    "test": "node ."
-  },
-  "keywords": [
-    "JavaScript"
-  ],
-  "author": "Bikramjit Dasgupta",
-  "license": "ISC"
+    "name": "sv-app",
+    "version": "1.0.0",
+    "description": "Backend server for JSReview with the core engine inside",
+    "main": "index.js",
+    "scripts": {
+        "test": "node .",
+        "start": "node ."
+    },
+    "keywords": [
+        "JavaScript"
+    ],
+    "author": "Bikramjit Dasgupta",
+    "license": "ISC",
+    "dependencies": {
+        "dotenv": "^16.0.3",
+        "fastify": "^4.13.0",
+        "mongodb": "^5.1.0"
+    },
+    "prettier": {
+        "bracketSpacing": true,
+        "jsxBracketSameLine": true,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "arrowParens": "avoid",
+        "tabWidth": 4,
+        "printWidth": 110,
+        "semi": false
+    }
 }
