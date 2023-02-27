@@ -5,6 +5,14 @@ const mongo = require('../src/database/mongo')
 const scanning = new Set()
 let scans
 
+const startEval = async (repoStr) => {
+    scanning.add(repoStr)
+
+    
+
+    scanning.delete(repoStr)
+}
+
 fastify.register(cors, {
     origin: ['localhost', 'http://jsreview.com', 'https://jsreview.com'],
     methods: ['GET'],
@@ -33,6 +41,7 @@ fastify.get('/acr/:user/:repo', async (request, reply) => {
     // only js files in format: {path,filename,content}
     return { files: [], acr: {} }
 
+    startEval(repoStr)
     return { error: 'scanning' }
 })
 

@@ -55,15 +55,20 @@ const Search = () => {
                     <Form>
                         {({ formProps }) => (
                             <form {...formProps}>
-                                <Field label="GitHub URL" name="gh-url-field">
+                                <Field label="GitHub Repository" name="gh-url-field">
                                     {({ fieldProps }) => (
                                         <Fragment>
                                             <Textfield
                                                 style={{ width: '100%' }}
-                                                placeholder="Enter a GitHub URL here"
+                                                placeholder="Enter <user>/<repo>"
                                                 {...fieldProps}
                                                 value={url}
                                                 onChange={e => setUrl(e.target.value)}
+                                                elemBeforeInput={
+                                                    <p style={{ margin: '0px', padding: '0px 8px 0px 12px' }}>
+                                                        https://github.com/
+                                                    </p>
+                                                }
                                             />
                                         </Fragment>
                                     )}
