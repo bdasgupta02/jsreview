@@ -18,16 +18,16 @@ def ep_predict_vuln():
         data = request.json
         pred = predict_vuln(
             model_vuln,
-            data['mccc'],
-            data['loc'],
-            data['tlloc'],
-            data['tloc'],
-            data['hor_d'],
-            data['hon_d'],
-            data['hon_t'],
-            data['hvoc'],
-            data['hdiff'],
-            data['cycl'],
+            mccc=data['mccc'],
+            loc=data['loc'],
+            tlloc=data['tlloc'],
+            tloc=data['tloc'],
+            hor_d=data['hor_d'],
+            hon_d=data['hon_d'],
+            hon_t=data['hon_t'],
+            hvoc=data['hvoc'],
+            hdiff=data['hdiff'],
+            cycl=data['cycl'],
         )
         pred = pred.item()
         return json.dumps({"pred": pred})
