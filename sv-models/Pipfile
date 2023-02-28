@@ -8,6 +8,7 @@ scikit-learn = "*"
 joblib = "*"
 flask = "*"
 pandas = "*"
+flask-cors = "*"
 
 [dev-packages]
 
