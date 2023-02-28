@@ -1,5 +1,5 @@
 from flask import Flask, request
-from .models.vulnerability import *
+from models.vulnerability import *
 
 app = Flask(__name__)
 
