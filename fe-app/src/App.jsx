@@ -8,6 +8,8 @@ import { B50, N50, B500, N0, B400 } from '@atlaskit/theme/colors'
 import EmptyState from '@atlaskit/empty-state'
 import Button from '@atlaskit/button'
 import constants from './constants/constants'
+import RepoProvider from './contexts/RepoProvider'
+import PrivateRoute from './components/PrivateRoute'
 
 // if a repo isn't loaded in context -> redirect
 
@@ -41,7 +43,7 @@ const NavTitle = () => {
                 {constants.name}
             </span>
             <span style={{ fontSize: '16px', fontWeight: 'normal' }}>bdasgupta02/</span>luminus2
-            <span style={{ marginLeft: '20px', color: N50, fontWeight: 'normal' }}>|</span>
+            <span style={{ marginLeft: '20px', color: N50, fontWeight: 'normal', fontSize: '20px' }}>|</span>
         </h3>
     )
 }
@@ -65,7 +67,7 @@ const RescanButton = () => {
 const NavBar = () => {
     const { pathname } = useLocation()
 
-    const routeInfo = [
+    const routeInfoA = [
         {
             name: 'Overview',
             route: '/overview',
@@ -87,12 +89,8 @@ const NavBar = () => {
             route: '/vulnerabilities',
         },
         {
-            name: 'Files',
-            route: '/files',
-        },
-        {
-            name: 'Pull Requests',
-            route: '/pulls',
+            name: 'Repository',
+            route: '/repo',
         },
     ]
 
@@ -100,7 +98,7 @@ const NavBar = () => {
         <AtlassianNavigation
             label="site"
             primaryItems={[
-                routeInfo.map(e => (
+                routeInfoA.map(e => (
                     <Link key={e.route} to={e.route} style={{ textDecoration: 'none' }}>
                         <PrimaryButton
                             style={{
@@ -129,13 +127,70 @@ const InnerRouter = () => {
             )}
             <Content>
                 <Routes>
-                    <Route path="/pulls" element={<Incomplete />} />
-                    <Route path="/files" element={<Incomplete />} />
-                    <Route path="/vulnerabilities" element={<Incomplete />} />
-                    <Route path="/maintainability" element={<Incomplete />} />
-                    <Route path="/smells" element={<Incomplete />} />
-                    <Route path="/bugs" element={<Incomplete />} />
-                    <Route path="/overview" element={<Incomplete />} />
+                    <Route
+                        path="/repo"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/pulls"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/files"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/vulnerabilities"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/maintainability"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/smells"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/bugs"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/overview"
+                        element={
+                            <PrivateRoute>
+                                <Incomplete />
+                            </PrivateRoute>
+                        }
+                    />
                     <Route path="/" element={<Search />} />
                 </Routes>
             </Content>
@@ -167,9 +222,11 @@ const App = () => {
 
     return (
         <AtlaskitThemeProvider mode={'light'}>
-            <Router>
-                <InnerRouter />
-            </Router>
+            <RepoProvider>
+                <Router>
+                    <InnerRouter />
+                </Router>
+            </RepoProvider>
         </AtlaskitThemeProvider>
     )
 }

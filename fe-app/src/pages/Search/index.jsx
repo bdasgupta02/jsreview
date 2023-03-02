@@ -7,8 +7,10 @@ import styled from 'styled-components'
 import SectionMessage from '@atlaskit/section-message'
 import constants from '../../constants/constants'
 import { useNavigate } from 'react-router-dom'
+import { useRepo } from '../../contexts/RepoProvider'
 
 const Search = () => {
+    const { scanRepo } = useRepo()
     const navigate = useNavigate()
 
     const [url, setUrl] = useState('')
@@ -26,6 +28,7 @@ const Search = () => {
         // show error otherwise
 
         try {
+            scanRepo('') // repo goes here
             navigate('/overview')
         } catch (e) {}
 

@@ -5,10 +5,8 @@ const mongo = require('../src/database/mongo')
 const scanning = new Set()
 let scans
 
-const startEval = async (repoStr) => {
+const startEval = async repoStr => {
     scanning.add(repoStr)
-
-    
 
     scanning.delete(repoStr)
 }
@@ -26,13 +24,12 @@ fastify.get('/is-scanning/:user/:repo', async (request, reply) => {
     return true
 })
 
-fastify.get('/acr/:user/:repo', async (request, reply) => {
+fastify.get('/acr/all/:user/:repo/:hash', async (request, reply) => {
     const { user, repo } = request.params
     const repoStr = `${user}/${repo}`
 
     if (scanning.has(repoStr)) return { error: 'scanning' }
 
-    // get latest commit hash
     // check database for commit hash,
     //  if exists: send acr, query files with github api and send js files
     //  if not: start calculation in async function, and send scanning error
@@ -44,6 +41,12 @@ fastify.get('/acr/:user/:repo', async (request, reply) => {
     startEval(repoStr)
     return { error: 'scanning' }
 })
+
+// v2 modular:
+// fastify.get('/acr/bugs/:user/:repo/:hash', async (request, reply) => {})
+// fastify.get('/acr/smells/:user/:repo/:hash', async (request, reply) => {})
+// fastify.get('/acr/main/:user/:repo/:hash', async (request, reply) => {})
+// fastify.get('/acr/vuln/:user/:repo/:hash', async (request, reply) => {})
 
 const start = async () => {
     try {
