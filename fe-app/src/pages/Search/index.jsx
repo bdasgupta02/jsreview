@@ -40,7 +40,7 @@ const Search = () => {
             <Outer id="search-outer">
                 <h1 style={{ marginBottom: '0' }}>{constants.name}</h1>
                 <h3 style={{ fontWeight: 'normal', marginBottom: '12px', marginTop: '0px' }}>
-                    An automatic code review framework for JavaScript in front-end projects
+                    A hybrid automatic code review framework for JavaScript that combines pattern and learning-based approaches
                 </h3>
                 <SectionMessage title="Dev mode (scan GitHub repositories for review)">
                     <p style={{ margin: '0px' }}>
