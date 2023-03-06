@@ -1,13 +1,16 @@
 from flask import Flask, request
 from flask_cors import CORS
 from models.vulnerability import *
+from transformers import T5ForConditionalGeneration, RobertaTokenizer
 from models.bugs import *
 import json
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins='*')
 
 model_vuln = get_model_vuln()
+model_bugs = T5ForConditionalGeneration.from_pretrained('bikpy/codet5-javascript-bug-refine')
+token_bugs = RobertaTokenizer.from_pretrained('bikpy/codet5-javascript-bug-refine')
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -45,7 +48,7 @@ def ep_predict_bugs():
         data = request.json
         resp = []
         for func in data:
-            resp.append(predict_bugs_func(func))
+            resp.append(predict_bugs_func(func, model_bugs, token_bugs))
         return resp
     except Exception as e:
         return {"error": e}

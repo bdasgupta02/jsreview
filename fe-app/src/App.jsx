@@ -73,12 +73,12 @@ const NavBar = () => {
             route: '/overview',
         },
         {
-            name: 'Bugs',
-            route: '/bugs',
-        },
-        {
             name: 'Smells',
             route: '/smells',
+        },
+        {
+            name: 'Bugs',
+            route: '/bugs',
         },
         {
             name: 'Maintainability',
