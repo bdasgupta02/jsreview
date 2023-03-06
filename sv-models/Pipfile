@@ -9,6 +9,10 @@ joblib = "*"
 flask = "*"
 pandas = "*"
 flask-cors = "*"
+gunicorn = "*"
+sentencepiece = "*"
+torch = "*"
+transformers = "*"
 
 [dev-packages]
 
