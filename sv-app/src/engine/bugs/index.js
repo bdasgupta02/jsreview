@@ -21,7 +21,7 @@ const bugs = async content => {
                 if (pred === 'error') {
                     continue
                 }
-                const isDefect = match(tokenized, pred)
+                const isDefect = matchDiff(tokenized, pred)
                 if (isDefect) {
                     result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
                 }
@@ -36,12 +36,12 @@ const bugs = async content => {
     }
 }
 
-const match = (funcStr, predStr) => {
+const matchDiff = (funcStr, predStr) => {
     try {
         compareAst(funcStr, predStr)
-        return true
-    } catch (e) {
         return false
+    } catch (e) {
+        return true
     }
 }
 
@@ -56,11 +56,9 @@ const predRefine = async tokenized => {
         },
     )
 
-    console.dir(resp)
-
     const data = resp.data
-    if (data && Array.isArray(data) && data.length > 0 && 'generated_text' in data[0]) {
-        return data[0]['generated_text']
+    if (data && Array.isArray(data) && data.length > 0) {
+        return data[0]
     } else {
         return 'error'
     }

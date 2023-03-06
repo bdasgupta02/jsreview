@@ -53,7 +53,7 @@ const smells = content => {
             const toAdd = callback()
             output[term] = toAdd
         } catch (e) {
-            console.log(`Error: ${e}`)
+            console.log(`Error: at ${term}: ${e}`)
             output[term] = []
         }
     }
@@ -514,7 +514,13 @@ const detectCallbackHell = (ast, maxDepth) => {
     const offenders = []
     let stack = []
 
-    walk.simple(ast, {
+    walk.recursive(ast, {
+        JSXElement(node) {
+            return
+        },
+        JSXFragment(node) {
+            return
+        },
         CallExpression(node) {
             if (
                 node.callee.type === 'Identifier' &&
@@ -534,6 +540,12 @@ const detectCallbackHell = (ast, maxDepth) => {
     }
 
     walk.ancestor(ast, {
+        JSXElement(node) {
+            return
+        },
+        JSXFragment(node) {
+            return
+        },
         CallExpression(node, ancestors) {
             if (stack.length === 0) return
 
