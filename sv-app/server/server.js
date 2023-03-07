@@ -54,10 +54,10 @@ const startEval = async (repoStr, user, repo, sha) => {
 
         // db
 
-        results.push({...files[i], smells: smellsRes, bugs: bugsRes})
+        results.push({bugs: bugsRes})
     }
 
-    console.log(results)
+    console.dir(results, {depth: null})
     
     //scans.insertOne({_id: `${user}-${repo}-${sha}`, results})
     scanning.delete(repoStr)

@@ -2,26 +2,24 @@ const acorn = require('acorn')
 const walk = require('acorn-walk')
 const jsx = require('acorn-jsx')
 const escodegen = require('escodegen')
-const compareAst = require('compare-ast')
 const axios = require('axios')
 
 const bugs = async content => {
-    // extract functions
-    // tokenize
-    // predict
-    // match (if its similar its false)
-    // return {defect:bool,path:str}
     try {
         const result = []
         const funcs = extrFunctions(content)
         for (let i = 0; i < funcs.length; i++) {
             try {
-                const tokenized = tokenize(funcs[i].node)
-                const pred = await predRefine(tokenized)
+                const tokenized = tokenize(convToExpression(funcs[i].node))
+                const tokenized_no_braces = removeCurvyWrapper(tokenized)
+                const pred = await predRefine(tokenized_no_braces)
+                console.log(tokenized_no_braces)
+                console.log(pred)
                 if (pred === 'error') {
                     continue
                 }
-                const isDefect = matchDiff(tokenized, pred)
+                const isDefect = matchDiff(tokenized_no_braces, pred)
+                console.log(isDefect)
                 if (isDefect) {
                     result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
                 }
@@ -36,25 +34,62 @@ const bugs = async content => {
     }
 }
 
-const matchDiff = (funcStr, predStr) => {
-    try {
-        compareAst(funcStr, predStr)
-        return false
-    } catch (e) {
-        return true
+const removeCurvyWrapper = code => {
+    const remIdx = idx => {
+        code = code.slice(0, idx) + code.slice(idx + 1)
     }
+
+    let funcExp = false
+    let firstBrace = false
+    for (let i = 0; i < code.length; i++) {
+        if (code[i] === 'f' && code.substring(i, i + 8).includes('function') && !firstBrace) {
+            funcExp = true
+        } else if (code[i] === '(' && funcExp) {
+            firstBrace = true
+            funcExp = false
+        } else if (code[i] === '(' && firstBrace) {
+            remIdx(i)
+            break
+        }
+    }
+
+    for (let i = code.length - 1; i >= 0; i--) {
+        if (code[i] === ')') {
+            remIdx(i)
+            break
+        }
+    }
+
+    return code
+}
+
+function convToExpression(ast) {
+    walk.simple(ast, {
+        FunctionDeclaration(node) {
+            node.type = 'FunctionExpression'
+            node.expression = false
+        },
+        ArrowFunctionExpression(node) {
+            node.type = 'FunctionExpression'
+            node.expression = true
+        },
+    })
+    return ast
+}
+
+const matchDiff = (funcStr, predStr) => {
+    const removeSpaces = str => str.replace(/\s+/g, '')
+    const funcClean = removeSpaces(funcStr)
+    const predClean = removeSpaces(predStr)
+    return funcClean !== predClean
 }
 
 const predRefine = async tokenized => {
-    const resp = await axios.post(
-        `${process.env.SV_MODELS}/predict/multiple/bugs`,
-        { funcs: [tokenized] },
-        {
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-            },
+    const resp = await axios.post(`${process.env.SV_MODELS}/predict/multiple/bugs`, [tokenized], {
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8',
         },
-    )
+    })
 
     const data = resp.data
     if (data && Array.isArray(data) && data.length > 0) {
