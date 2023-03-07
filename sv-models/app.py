@@ -23,18 +23,19 @@ def ep_predict_vuln():
         data = request.json
         resp = []
         for func in data:
+            #mccc, numpar, hor_d, hon_d, hon_t, hlen, hvoc, hdiff, params, cycl_dens
             pred = predict_vuln(
                 model_vuln,
                 mccc=func['mccc'],
-                loc=func['loc'],
-                tlloc=func['tlloc'],
-                tloc=func['tloc'],
+                numpar=func['numpar'],
                 hor_d=func['hor_d'],
                 hon_d=func['hon_d'],
                 hon_t=func['hon_t'],
+                hlen=func['hlen'],
                 hvoc=func['hvoc'],
                 hdiff=func['hdiff'],
-                cycl=func['cycl'],
+                params=func['params'],
+                cycl_dens=func['cycl_dens'],
             )
             resp.append(pred.item())
         return json.dumps(resp)

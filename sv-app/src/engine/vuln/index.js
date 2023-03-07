@@ -3,14 +3,17 @@ const walk = require('acorn-walk')
 const jsx = require('acorn-jsx')
 const escomplex = require('escomplex')
 const escodegen = require('escodegen')
+const axios = require('axios')
 
-const vulnerabilities = (content) => {
+const vulnerabilities = async content => {
     try {
         const result = []
         const funcs = extrFunctions(content)
         for (let i = 0; i < funcs.length; i++) {
             try {
-
+                const metrics = getMetrics(funcs[i].node)
+                const pred = await predVuln(metrics)
+                if (pred) result.push({ start: funcs[i].start, end: funcs[i].end })
             } catch (eInner) {
                 console.log(`Error: ${eInner}`)
             }
@@ -22,22 +25,66 @@ const vulnerabilities = (content) => {
     }
 }
 
-const getMetrics = (ast) => {
-    const funcStr = escodegen.generate(ast)
-    const metrics = escomplex.analyse(funcStr).aggregate
+const predVuln = async metrics => {
+    const resp = await axios.post(`${process.env.SV_MODELS}/predict/multiple/vuln`, [metrics], {
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+        },
+    })
+
+    const data = resp.data
+    return data[0] === 1
+}
+
+const getMetrics = ast => {
+    let funcStr = escodegen.generate(ast)
+    if (ast.type === 'ArrowFunctionExpression') {
+        funcStr = 'const f = ' + funcStr
+    } else if (ast.type === 'FunctionExpression') {
+        func_split = funcStr.indexOf('(')
+        func_second = funcStr.slice(func_split + 1)
+        funcStr = 'function f(' + gen1_second
+    }
+
+    let metrics = escomplex.analyse(funcStr)
+    if ('functions' in metrics && metrics.functions.length > 0) {
+        metrics = metrics.functions[0]
+    } else {
+        metrics = metrics.aggregate
+    }
+    const halstead = metrics.halstead
     return {
         mccc: metrics.cyclomatic,
-        loc: 20,
-        tlloc: 16,
-        tloc: 21,
-        hor_d: 9,
-        hon_d: 25,
-        hon_t: 47,
-        hvoc: 34,
-        hdiff: 8.46,
-        cycl: 23.07692308
+        numpar: metrics.params,
+        hor_d: halstead.operators.distinct,
+        hon_d: halstead.operands.distinct,
+        hon_t: halstead.operators.total,
+        hlen: halstead.length,
+        hvoc: halstead.vocabulary,
+        hdiff: halstead.difficulty,
+        params: metrics.params,
+        cycl_dens: metrics.cyclomaticDensity,
     }
-} 
+}
+
+const hasJSX = ast => {
+    try {
+        let hasJSX = false
+        walk.recursive(ast, null, {
+            JSXElement(node) {
+                hasJSX = true
+            },
+            JSXFragment(node) {
+                hasJSX = true
+            },
+        })
+
+        return hasJSX
+    } catch (e) {
+        console.log('Error in hasJSX: ' + e)
+        return true
+    }
+}
 
 const extrFunctions = code => {
     const funcs = []

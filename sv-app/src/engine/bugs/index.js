@@ -110,7 +110,7 @@ const hasJSX = ast => {
 
         return hasJSX
     } catch (e) {
-        console.log('Issue in smells/hasJSX ' + e)
+        console.log('Error in hasJSX: ' + e)
         return true
     }
 }

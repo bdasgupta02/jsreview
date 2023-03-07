@@ -7,7 +7,7 @@ const bugs = require('../src/engine/bugs')
 const maintainability = require('../src/engine/main')
 const vulnerabilities = require('../src/engine/vuln')
 
-const scanning = new Set()
+const scanning = {}
 let scans
 
 const access_token = process.env.GITHUB_TOKEN
@@ -35,11 +35,8 @@ const getFiles = async (user, repo, sha) => {
 }
 
 const startEval = async (repoStr, user, repo, sha) => {
-    scanning.add(repoStr)
+    scanning[repoStr] = 'Starting..'
 
-    // use inference api directly
-
-    const toSave = []
     const results = []
     const files = await getFiles(user, repo, sha)
 
@@ -51,13 +48,13 @@ const startEval = async (repoStr, user, repo, sha) => {
         const mainRes = maintainability(content)
         const vulnRes = vulnerabilities(content)
 
-        results.push({...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes})
-    }
+        results.push({ ...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes, vuln: vulnRes })
+        scanning[repoStr] = `${i + 1}/${files.length}`
+        console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}`)
+    } // POSSIBLE BUG (todomvc)
 
-    console.dir(results, {depth: null})
-    
-    //scans.insertOne({_id: `${user}-${repo}-${sha}`, ...results})
-    scanning.delete(repoStr)
+    scans.insertOne({ _id: `${user}-${repo}-${sha}`, ...results })
+    delete scanning[repoStr]
 }
 
 fastify.register(cors, {
@@ -73,15 +70,23 @@ fastify.get('/ping', async () => {
 fastify.get('/acr/all/:user/:repo', async (request, reply) => {
     const { user, repo } = request.params
     const repoStr = `${user}/${repo}`
-    if (scanning.has(repoStr)) return { error: 'scanning' }
+    if (repoStr in scanning) return { error: 'scanning', state: scanning[repoStr] }
 
-    const latest = await axios.get(`https://api.github.com/repos/${user}/${repo}/commits`, gh_header)
+    let latest
+    try {
+        latest = await axios.get(`https://api.github.com/repos/${user}/${repo}/commits`, gh_header)
+    } catch (e) {
+        return { error: 'exceeded' }
+    }
     const sha = latest?.data[0]?.sha
 
-    const check = await scans.findOne({ _id: `${user}-${repo}-${sha}` })
+    const check = await scans.findOne({
+        _id: { $regex: `^${user}-${repo}` },
+    }) /* BYPASSING LATEST CHECK: _id: `${user}-${repo}-${sha}`*/
+
     if (!check) {
         startEval(repoStr, user, repo, sha)
-        return { error: 'scanning' }
+        return { error: 'scanning', state: 'Starting..' }
     }
 
     const files = await getFiles(user, repo, sha)
