@@ -5,10 +5,8 @@ const jsx = require('acorn-jsx')
 const empty = {
     largeFuncs: [],
     largeNesting: [],
-    godObjects: {
-        manyVariables: [],
-        manyParameters: [],
-    },
+    godVariables: [],
+    godParameters: [],
     unusedVars: [],
     magicLiterals: [],
     callbackHell: [],
@@ -383,7 +381,7 @@ const detectManyVars = (ast, maxVars = 10) => {
     }
 }
 
-const detectNesting = (ast, depthLimit = 4) => {
+const detectNesting = (ast, depthLimit = 3) => {
     try {
         let maxDepth = 0
         const result = []
@@ -510,72 +508,39 @@ function detectMagicLiterals(ast) {
     return literalLines
 }
 
-const detectCallbackHell = (ast, maxDepth) => {
-    const offenders = []
-    let stack = []
+function detectCallbackHell(ast, maxDepth = 2) {
+    const result = []
 
-    walk.recursive(ast, {
-        JSXElement(node) {
-            return
-        },
-        JSXFragment(node) {
-            return
-        },
-        CallExpression(node) {
-            if (
-                node.callee.type === 'Identifier' &&
-                node.arguments.length === 2 &&
-                node.arguments[1].type === 'FunctionExpression'
-            ) {
-                stack.push(node)
+    const traverse = (node, depth) => {
+        if (!node || typeof node !== 'object' || !('type' in node)) return
+        if (node.type && node.type === 'CallExpression') {
+            depth++
+            if (depth > maxDepth) {
+                result.push({
+                    depth,
+                    start: node.loc.start.line,
+                    end: node.loc.end.line,
+                })
             }
-        },
-    })
+        }
 
-    function popStack() {
-        const element = stack.pop()
-        if (stack.length === 0) {
-            offenders.push({ start: element.loc.start.line, end: element.loc.end.line })
+        for (let attr in node) {
+            if (node[attr] && typeof node[attr] === 'object') {
+                if (Array.isArray(node[attr])) {
+                    for (let e in node[attr]) {
+                        if (typeof node[attr][e] === 'object' && !Array.isArray(node[attr][e])) {
+                            traverse(node[attr][e], depth)
+                        }
+                    }
+                } else if ('type' in node[attr]) {
+                    traverse(node[attr], depth)
+                }
+            }
         }
     }
 
-    walk.ancestor(ast, {
-        JSXElement(node) {
-            return
-        },
-        JSXFragment(node) {
-            return
-        },
-        CallExpression(node, ancestors) {
-            if (stack.length === 0) return
-
-            const parent = ancestors[ancestors.length - 2]
-            const grandParent = ancestors[ancestors.length - 3]
-
-            if (parent !== stack[stack.length - 1] && grandParent !== stack[stack.length - 1]) {
-                popStack()
-                return
-            }
-
-            const callbackIndex = parent.arguments.indexOf(node)
-
-            if (callbackIndex !== 1) return
-
-            const stackIndex = stack.findIndex(call => call === parent)
-
-            if (stackIndex === -1) return
-
-            const depth = stack.length - stackIndex
-
-            if (depth > maxDepth) {
-                const startLine = stack[stackIndex].loc.start.line
-                const endLine = node.loc.end.line
-                offenders.push({ startLine, endLine })
-            }
-        },
-    })
-
-    return offenders
+    traverse(ast, 0)
+    return result
 }
 
 module.exports = smells
