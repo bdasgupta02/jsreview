@@ -10,7 +10,7 @@ const maintainability = code => {
             const toAdd = callback()
             output[term] = toAdd
         } catch (e) {
-            console.log('Issue in maintainability: ' + e)
+            console.log('Error in maintainability: ' + e)
             output[term] = []
         }
     }

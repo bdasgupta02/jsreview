@@ -26,7 +26,7 @@ const bugs = async content => {
         }
         return result
     } catch (e) {
-        console.log(`Error: ${e}`)
+        console.log(`Error in bugs: ${e}`)
         return []
     }
 }

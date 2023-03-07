@@ -5,6 +5,7 @@ const mongo = require('../src/database/mongo')
 const smells = require('../src/engine/smells')
 const bugs = require('../src/engine/bugs')
 const maintainability = require('../src/engine/main')
+const vulnerabilities = require('../src/engine/vuln')
 
 const scanning = new Set()
 let scans
@@ -48,7 +49,7 @@ const startEval = async (repoStr, user, repo, sha) => {
         const smellsRes = smells(content)
         const bugsRes = await bugs(content)
         const mainRes = maintainability(content)
-        // vuln
+        const vulnRes = vulnerabilities(content)
 
         results.push({...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes})
     }
