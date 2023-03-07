@@ -29,7 +29,7 @@ const getFiles = async (user, repo, sha) => {
         const contentData = contentResp.data
         const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
         return { path: file.path, content }
-    })
+    }) // POSSIBLE BUG (todomvc) - might be due to rate limit
     const result = await Promise.all(promises)
     return result
 }
@@ -51,7 +51,7 @@ const startEval = async (repoStr, user, repo, sha) => {
         results.push({ ...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes, vuln: vulnRes })
         scanning[repoStr] = `${i + 1}/${files.length}`
         console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}`)
-    } // POSSIBLE BUG (todomvc)
+    }
 
     scans.insertOne({ _id: `${user}-${repo}-${sha}`, ...results })
     delete scanning[repoStr]
