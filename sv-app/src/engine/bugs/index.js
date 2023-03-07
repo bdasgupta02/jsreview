@@ -13,13 +13,10 @@ const bugs = async content => {
                 const tokenized = tokenize(convToExpression(funcs[i].node))
                 const tokenized_no_braces = removeCurvyWrapper(tokenized)
                 const pred = await predRefine(tokenized_no_braces)
-                console.log(tokenized_no_braces)
-                console.log(pred)
                 if (pred === 'error') {
                     continue
                 }
                 const isDefect = matchDiff(tokenized_no_braces, pred)
-                console.log(isDefect)
                 if (isDefect) {
                     result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
                 }
