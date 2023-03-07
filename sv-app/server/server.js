@@ -7,6 +7,11 @@ const bugs = require('../src/engine/bugs')
 const maintainability = require('../src/engine/main')
 const vulnerabilities = require('../src/engine/vuln')
 
+// TODO squash file list to path list, then query those paths
+// get around rate limit
+
+// v2: async
+
 const scanning = {}
 let scans
 
@@ -15,22 +20,41 @@ const gh_header = {
     headers: { Authorization: access_token },
 }
 
-const getFiles = async (user, repo, sha) => {
+const getFiles = async (repoStr, user, repo, sha) => {
+    scanning[repoStr] = 'Getting files..'
+
     const tree = await axios.get(
         `https://api.github.com/repos/${user}/${repo}/git/trees/${sha}?recursive=1`,
         gh_header,
     )
     const jsFiles = tree.data.tree.filter(file => file.path.endsWith('.js'))
-    const promises = jsFiles.map(async file => {
+
+    const result = []
+    
+    // not async to prevent secondary rate limit
+    for (let i = 0; i < jsFiles.length; i++) {
+        const file = jsFiles[i]
         const contentResp = await axios.get(
             `https://api.github.com/repos/${user}/${repo}/contents/${file.path}?ref=${sha}`,
             gh_header,
         )
         const contentData = contentResp.data
         const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
-        return { path: file.path, content }
-    }) // POSSIBLE BUG (todomvc) - might be due to rate limit
-    const result = await Promise.all(promises)
+        result.push({ path: file.path, content })
+        scanning[repoStr] = `Downloading file ${i+1}/${jsFiles.length}..`
+    }
+
+    // const promises = jsFiles.map(async file => {
+    //     const contentResp = await axios.get(
+    //         `https://api.github.com/repos/${user}/${repo}/contents/${file.path}?ref=${sha}`,
+    //         gh_header,
+    //     )
+    //     const contentData = contentResp.data
+    //     const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
+    //     return { path: file.path, content }
+    // }) // POSSIBLE BUG (todomvc) - might be due to rate limit
+    // const result = await Promise.all(promises)
+    scanning[repoStr] = `All ${jsFiles.length} files downloaded..`
     return result
 }
 
@@ -38,7 +62,7 @@ const startEval = async (repoStr, user, repo, sha) => {
     scanning[repoStr] = 'Starting..'
 
     const results = []
-    const files = await getFiles(user, repo, sha)
+    const files = await getFiles(repoStr, user, repo, sha)
 
     for (let i = 0; i < files.length; i++) {
         const content = files[i].content
@@ -50,10 +74,10 @@ const startEval = async (repoStr, user, repo, sha) => {
 
         results.push({ ...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes, vuln: vulnRes })
         scanning[repoStr] = `${i + 1}/${files.length}`
-        console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}`)
+        console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}..`)
     }
 
-    scans.insertOne({ _id: `${user}-${repo}-${sha}`, ...results })
+    scans.insertOne({ _id: `${user}-${repo}-${sha}`, acr: results })
     delete scanning[repoStr]
 }
 
@@ -89,8 +113,7 @@ fastify.get('/acr/all/:user/:repo', async (request, reply) => {
         return { error: 'scanning', state: 'Starting..' }
     }
 
-    const files = await getFiles(user, repo, sha)
-    return { files: files, acr: check, sha: sha }
+    return { acr: check, sha: sha }
 })
 
 // v2 modular:
