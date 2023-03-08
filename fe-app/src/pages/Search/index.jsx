@@ -28,7 +28,7 @@ const Search = () => {
         // show error otherwise
 
         try {
-            scanRepo('') // repo goes here
+            scanRepo(url) // repo goes here
             navigate('/overview')
         } catch (e) {}
 

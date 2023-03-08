@@ -82,7 +82,7 @@ const startEval = async (repoStr, user, repo, sha) => {
 }
 
 fastify.register(cors, {
-    origin: ['localhost', 'http://jsreview.com', 'https://jsreview.com'],
+    origin: '*',
     methods: ['GET'],
 })
 
@@ -100,7 +100,7 @@ fastify.get('/acr/all/:user/:repo', async (request, reply) => {
     try {
         latest = await axios.get(`https://api.github.com/repos/${user}/${repo}/commits`, gh_header)
     } catch (e) {
-        return { error: 'exceeded' }
+        return { error: 'github' }
     }
     const sha = latest?.data[0]?.sha
 

@@ -1,5 +1,7 @@
 import React, { useState, useContext, createContext } from 'react'
 import Spinner from '@atlaskit/spinner'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 // v2: add local storage?
 // make scanning eventually modular once details are in
@@ -11,50 +13,66 @@ export const useRepo = () => {
 }
 
 const RepoProvider = ({ children }) => {
+    const url = 'http://127.0.0.1:8010'
+    const navigate = useNavigate()
+
     const [isPending, setPending] = useState(false)
 
     const [hasRepo, setHasRepo] = useState(false)
-    const [isScanInner, setScanInner] = useState({
+    const [isScanInner, setScanInner] = useState({ // v2
         bugs: false,
         smells: false,
         main: false,
         vuln: false,
     })
-    const [repo, setRepo] = useState({})
     const [scan, setScan] = useState({})
+    const [err, setErr] = useState('Please wait.')
 
-    const scannerDaemon = async () => {
-        // v2: 
+    const scannerDaemon = async repo => {
+        // v2:
         // set has repo true after searching github for files
         // then set another useState true for "searching inner" to indicate search for each subpage
         // they will load automatically
         // set scan inner after initially checking gh, piece by piece according to the 4 endpoints
+        
+        try {
+            while (true) {
+                const resp = await axios.get(`${url}/acr/all/${repo}`)
+                const data = resp.data
+                console.log(data)
+                if ('error' in data) {
+                    if (data.error === 'exceeded') {
+                        setErr('GitHub API Error. Please refresh the page and search for another repository.')
+                        return
+                    } else {
+                        setErr(data.state)
+                    }
+                } else {
+                    setPending(false)
+                    setHasRepo(true)
+                    setScan(data)
+                    setErr('Please wait.')
+                    navigate('/overview')
+                    return
+                }
 
-
-        // if repo doesn't exist, return
-        return
-
-        setHasRepo(true)
-        setRepo({
-            /* Details */
-        })
-        setScan({
-            /* Details */
-        })
-        setPending(false)
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        } catch (e) {
+            console.log('GitHub API server error')
+            setPending(false)
+        }
     }
 
     const scanRepo = repo => {
         setPending(true)
         setHasRepo(false)
-        setRepo({})
-        scannerDaemon()
+        scannerDaemon(repo)
     }
 
     const value = {
         isScanInner,
         hasRepo,
-        repo,
         scan,
         scanRepo,
     }
@@ -72,7 +90,7 @@ const RepoProvider = ({ children }) => {
                 }}>
                 <Spinner size="large" />
                 <h2 style={{ margin: '32px 0px 0px 0px' }}>Scanning in progress</h2>
-                <p style={{ margin: '6px' }}>Please wait.</p>
+                <p style={{ margin: '6px' }}>{err}</p>
             </div>
         )
 

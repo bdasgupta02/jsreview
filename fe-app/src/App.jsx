@@ -222,11 +222,11 @@ const App = () => {
 
     return (
         <AtlaskitThemeProvider mode={'light'}>
-            <RepoProvider>
-                <Router>
+            <Router>
+                <RepoProvider>
                     <InnerRouter />
-                </Router>
-            </RepoProvider>
+                </RepoProvider>
+            </Router>
         </AtlaskitThemeProvider>
     )
 }
