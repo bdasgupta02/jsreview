@@ -12,6 +12,7 @@ const vulnerabilities = require('../src/engine/vuln')
 
 // v2: async
 
+const fileCache = {}
 const scanning = {}
 let scans
 
@@ -30,7 +31,7 @@ const getFiles = async (repoStr, user, repo, sha) => {
     const jsFiles = tree.data.tree.filter(file => file.path.endsWith('.js'))
 
     const result = []
-    
+
     // not async to prevent secondary rate limit
     for (let i = 0; i < jsFiles.length; i++) {
         const file = jsFiles[i]
@@ -41,7 +42,7 @@ const getFiles = async (repoStr, user, repo, sha) => {
         const contentData = contentResp.data
         const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
         result.push({ path: file.path, content })
-        scanning[repoStr] = `Downloading file ${i+1}/${jsFiles.length}..`
+        scanning[repoStr] = `Downloading file ${i + 1}/${jsFiles.length}..`
     }
 
     // const promises = jsFiles.map(async file => {
@@ -55,6 +56,7 @@ const getFiles = async (repoStr, user, repo, sha) => {
     // }) // POSSIBLE BUG (todomvc) - might be due to rate limit
     // const result = await Promise.all(promises)
     scanning[repoStr] = `All ${jsFiles.length} files downloaded..`
+    fileCache[repoStr] = result
     return result
 }
 
@@ -70,14 +72,20 @@ const startEval = async (repoStr, user, repo, sha) => {
         const smellsRes = smells(content)
         const bugsRes = await bugs(content)
         const mainRes = maintainability(content)
-        const vulnRes = vulnerabilities(content)
+        const vulnRes = await vulnerabilities(content)
 
-        results.push({ ...files[i], smells: smellsRes, bugs: bugsRes, main: mainRes, vuln: vulnRes })
-        scanning[repoStr] = `${i + 1}/${files.length}`
+        results.push({
+            path: files[i].path,
+            smells: structuredClone(smellsRes),
+            bugs: structuredClone(bugsRes),
+            main: structuredClone(mainRes),
+            vuln: structuredClone(vulnRes),
+        })
+        scanning[repoStr] = `Analyzing file: ${i + 1}/${files.length}`
         console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}..`)
     }
-
-    scans.insertOne({ _id: `${user}-${repo}-${sha}`, acr: results })
+    
+    scans.insertOne({ _id: `${user}-${repo}-${sha}`, acr: results, sha: sha })
     delete scanning[repoStr]
 }
 
@@ -113,7 +121,12 @@ fastify.get('/acr/all/:user/:repo', async (request, reply) => {
         return { error: 'scanning', state: 'Starting..' }
     }
 
-    return { acr: check, sha: sha }
+    if (repoStr in fileCache) {
+        return { sha: sha, acr: check, files: fileCache[repoStr] }
+    }
+
+    const files = await getFiles(repoStr, user, repo, check.sha)
+    return { sha: check.sha, acr: check, files }
 })
 
 // v2 modular:

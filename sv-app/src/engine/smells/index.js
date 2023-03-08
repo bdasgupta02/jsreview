@@ -42,7 +42,7 @@ const smells = content => {
             plugins: { jsx: true },
         })
     } catch (e) {
-        console.log(`Error: ${e}`)
+        console.log(`Error at smells initial: ${e}`)
         return output
     }
 
@@ -508,7 +508,7 @@ function detectMagicLiterals(ast) {
     return literalLines
 }
 
-function detectCallbackHell(ast, maxDepth = 2) {
+function detectCallbackHell(ast, maxDepth = 3) {
     const result = []
 
     const traverse = (node, depth) => {

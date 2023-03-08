@@ -27,10 +27,8 @@ const Search = () => {
         // check if a valid url, and is a public github repository
         // show error otherwise
 
-        try {
-            scanRepo(url) // repo goes here
-            navigate('/overview')
-        } catch (e) {}
+        scanRepo(url) // repo goes here
+        navigate('/overview')
 
         setLoading(false)
     }

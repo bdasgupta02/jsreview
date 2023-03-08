@@ -27,6 +27,8 @@ const RepoProvider = ({ children }) => {
     })
     const [scan, setScan] = useState({})
     const [err, setErr] = useState('Please wait.')
+    const [sha, setSha] = useState('')
+    const [repo, setRepo] = useState('')
 
     const scannerDaemon = async repo => {
         // v2:
@@ -34,12 +36,12 @@ const RepoProvider = ({ children }) => {
         // then set another useState true for "searching inner" to indicate search for each subpage
         // they will load automatically
         // set scan inner after initially checking gh, piece by piece according to the 4 endpoints
-        
+
+
         try {
             while (true) {
                 const resp = await axios.get(`${url}/acr/all/${repo}`)
                 const data = resp.data
-                console.log(data)
                 if ('error' in data) {
                     if (data.error === 'exceeded') {
                         setErr('GitHub API Error. Please refresh the page and search for another repository.')
@@ -51,15 +53,18 @@ const RepoProvider = ({ children }) => {
                     setPending(false)
                     setHasRepo(true)
                     setScan(data)
+                    setSha(data.sha.slice(0, 8))
+                    setRepo(repo)
                     setErr('Please wait.')
-                    navigate('/overview')
+                    navigate('/smells')
                     return
                 }
 
                 await new Promise(r => setTimeout(r, 1000));
             }
         } catch (e) {
-            console.log('GitHub API server error')
+            console.log('GitHub API server error: ' + e)
+            setErr('GitHub API Error. Please refresh the page and search for another repository.')
             setPending(false)
         }
     }
@@ -74,6 +79,8 @@ const RepoProvider = ({ children }) => {
         isScanInner,
         hasRepo,
         scan,
+        sha,
+        repo,
         scanRepo,
     }
 

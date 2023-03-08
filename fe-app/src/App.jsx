@@ -4,14 +4,17 @@ import { AtlaskitThemeProvider } from '@atlaskit/theme'
 import { BrowserRouter as Router, Routes, Route, useLocation, Link, useNavigate } from 'react-router-dom'
 import { AtlassianNavigation, PrimaryButton } from '@atlaskit/atlassian-navigation'
 import { PageLayout, Content, TopNavigation } from '@atlaskit/page-layout'
-import { B50, N50, B500, N0, B400 } from '@atlaskit/theme/colors'
+import { N50, N0, B400 } from '@atlaskit/theme/colors'
 import EmptyState from '@atlaskit/empty-state'
 import Button from '@atlaskit/button'
-import constants from './constants/constants'
-import RepoProvider from './contexts/RepoProvider'
+import RepoProvider, { useRepo } from './contexts/RepoProvider'
 import PrivateRoute from './components/PrivateRoute'
+import Lozenge from '@atlaskit/lozenge'
+// Pages
+import Smells from './pages/Smells'
 
 // if a repo isn't loaded in context -> redirect
+// add hash value to the title
 
 const Incomplete = () => (
     <EmptyState
@@ -20,7 +23,28 @@ const Incomplete = () => (
     />
 )
 
+// const NavLogo = () => {
+//     return (
+//         <span
+//             style={{
+//                 margin: '2px 12px 0px 0px',
+//                 backgroundColor: B50,
+//                 padding: '6px 6px 8px 6px',
+//                 fontSize: '14px',
+//                 borderRadius: '5px',
+//                 color: B500,
+//                 opacity: 0.7,
+//             }}>
+//             {constants.name}
+//         </span>
+//     )
+// }
+
 const NavTitle = () => {
+    const { sha, repo } = useRepo()
+    const user = repo.split('/')[0]
+    const rep = repo.split('/')[1]
+
     return (
         <h3
             style={{
@@ -30,19 +54,18 @@ const NavTitle = () => {
                 flexDirection: 'row',
                 alignItems: 'center',
             }}>
+            <span style={{ fontSize: '16px', fontWeight: 'normal' }}>{user}/</span>
+            {rep}
             <span
                 style={{
-                    margin: '2px 12px 0px 0px',
-                    backgroundColor: B50,
-                    padding: '6px 6px 8px 6px',
-                    fontSize: '14px',
-                    borderRadius: '5px',
-                    color: B500,
-                    opacity: 0.7,
+                    marginLeft: '12px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingTop: '3px',
                 }}>
-                {constants.name}
+                <Lozenge>{sha}</Lozenge>
             </span>
-            <span style={{ fontSize: '16px', fontWeight: 'normal' }}>bdasgupta02/</span>luminus2
             <span style={{ marginLeft: '20px', color: N50, fontWeight: 'normal', fontSize: '20px' }}>|</span>
         </h3>
     )
@@ -119,82 +142,84 @@ const NavBar = () => {
 const InnerRouter = () => {
     const { pathname } = useLocation()
     return (
-        <PageLayout>
-            {pathname && pathname !== '/' && (
-                <TopNavigation>
-                    <NavBar />
-                </TopNavigation>
-            )}
-            <Content>
-                <Routes>
-                    <Route
-                        path="/repo"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/pulls"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/files"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/vulnerabilities"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/maintainability"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/smells"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/bugs"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/overview"
-                        element={
-                            <PrivateRoute>
-                                <Incomplete />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path="/" element={<Search />} />
-                </Routes>
-            </Content>
-        </PageLayout>
+        <div style={{ height: '100vh', width: '100vw' }}>
+            <PageLayout>
+                {pathname && pathname !== '/' && (
+                    <TopNavigation>
+                        <NavBar />
+                    </TopNavigation>
+                )}
+                <Content>
+                    <Routes>
+                        <Route
+                            path="/repo"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/pulls"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/files"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/vulnerabilities"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/maintainability"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/smells"
+                            element={
+                                <PrivateRoute>
+                                    <Smells />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/bugs"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/overview"
+                            element={
+                                <PrivateRoute>
+                                    <Incomplete />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route path="/" element={<Search />} />
+                    </Routes>
+                </Content>
+            </PageLayout>
+        </div>
     )
 }
 

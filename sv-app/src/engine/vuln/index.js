@@ -43,7 +43,7 @@ const getMetrics = ast => {
     } else if (ast.type === 'FunctionExpression') {
         func_split = funcStr.indexOf('(')
         func_second = funcStr.slice(func_split + 1)
-        funcStr = 'function f(' + gen1_second
+        funcStr = 'function f(' + func_second
     }
 
     let metrics = escomplex.analyse(funcStr)
