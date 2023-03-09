@@ -84,7 +84,7 @@ const startEval = async (repoStr, user, repo, sha) => {
         scanning[repoStr] = `Analyzing file: ${i + 1}/${files.length}`
         console.log(`Scanning: ${repoStr}: ${i + 1}/${files.length}..`)
     }
-    
+
     scans.insertOne({ _id: `${user}-${repo}-${sha}`, acr: results, sha: sha })
     delete scanning[repoStr]
 }
@@ -127,6 +127,21 @@ fastify.get('/acr/all/:user/:repo', async (request, reply) => {
 
     const files = await getFiles(repoStr, user, repo, check.sha)
     return { sha: check.sha, acr: check, files }
+})
+
+fastify.get('/file/:user/:repo/:hash/:path', async (request, reply) => {
+    const { user, repo, hash, path } = request.params
+    try {
+        const contentResp = await axios.get(
+            `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${hash}`,
+            gh_header,
+        )
+        const contentData = contentResp.data
+        const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
+        return { content: content }
+    } catch (e) {
+        return { error: 'exceeded' }
+    }
 })
 
 // v2 modular:
