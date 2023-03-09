@@ -16,8 +16,8 @@ const bugs = async content => {
                 if (pred === 'error') {
                     continue
                 }
-                const isDefect = matchDiff(tokenized_no_braces, pred)
-                if (isDefect) {
+                const isMatch = matchFuncs(pred, funcs[i].node)
+                if (!isMatch) {
                     result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
                 }
             } catch (eInner) {
@@ -29,6 +29,53 @@ const bugs = async content => {
         console.log(`Error in bugs: ${e}`)
         return []
     }
+}
+
+const getBlock = func => {
+    walk.simple(func, {
+        BlockStatement(node) {
+            func = node
+            return
+        },
+    })
+    return func
+}
+
+const getStructure = obj => {
+    if (!obj) {
+        return null
+    } else if (Array.isArray(obj)) {
+        return obj.map(e => getStructure(e))
+    } else if (typeof obj === 'object') {
+        const filtered = {}
+        for (const key in obj) {
+            const val = obj[key]
+            if (!val) continue
+            if (Array.isArray(val) || typeof val === 'object') {
+                filtered[key] = getStructure(val)
+            } else if (key === 'type') {
+                filtered[key] = val
+            }
+        }
+        return filtered
+    }
+}
+
+const matchFuncs = (s, b_ast) => {
+    // smaller will always be predicted
+    const removeSpaces = str => str.replace(/\s+/g, '')
+
+    s = removeSpaces(s)
+    s_split = s.indexOf('(')
+    s_second = s.slice(func_split + 1)
+    s = 'function f(' + s_second
+
+    const s_ast = getBlock(acorn.parse(s))
+    const s_types = getStructure(s_ast)
+    const b_types = getStructure(b_ast)
+    const s_str = JSON.stringify(s_types)
+    const b_str = JSON.stringify(b_types)
+    return b_str.includes(s_str)
 }
 
 const removeCurvyWrapper = code => {
