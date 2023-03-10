@@ -1,18 +1,16 @@
 import React, { useState } from 'react'
 import { useRepo } from '../../contexts/RepoProvider'
 import Breadcrumbs, { BreadcrumbsItem } from '@atlaskit/breadcrumbs'
-import Viewer from '../../components/Viewer'
+import Viewer from '../../components/MultiViewer'
 import { useNavigate } from 'react-router-dom'
 import BulletListIcon from '@atlaskit/icon/glyph/bullet-list'
 import CodeViewer from '../../components/CodeViewer'
-import { useEffect } from 'react'
 
 const Maintainability = () => {
     const [isViewerMode, setViewerMode] = useState(true)
 
     let { scan } = useRepo()
     if (scan && Array.isArray(scan)) scan = scan.map(({ bugs, smells, vuln, ...keepAtrs }) => keepAtrs)
-    console.log(scan)
 
     const navigate = useNavigate()
 
@@ -97,7 +95,12 @@ const Maintainability = () => {
             onClick={onViewDetails}
         />
     ) : (
-        <CodeViewer onBack={() => setViewerMode(true)} details={details} />
+        <CodeViewer
+            onBack={() => setViewerMode(true)}
+            details={details}
+            bread1="Maintainability"
+            bread2="Report"
+        />
     )
 }
 

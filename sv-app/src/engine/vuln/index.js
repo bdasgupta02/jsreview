@@ -15,7 +15,7 @@ const vulnerabilities = async content => {
                 const pred = await predVuln(metrics)
                 if (pred) result.push({ start: funcs[i].start, end: funcs[i].end })
             } catch (eInner) {
-                console.log(`Error: ${eInner}`)
+                console.log(`Error in vuln: ${eInner}`)
             }
         }
         return result
@@ -38,9 +38,9 @@ const predVuln = async metrics => {
 
 const getMetrics = ast => {
     let funcStr = escodegen.generate(ast)
-    if (ast.type === 'ArrowFunctionExpression') {
+    if (ast && ast.type && ast.type === 'ArrowFunctionExpression') {
         funcStr = 'const f = ' + funcStr
-    } else if (ast.type === 'FunctionExpression') {
+    } else if (ast && ast.type && ast.type === 'FunctionExpression') {
         func_split = funcStr.indexOf('(')
         func_second = funcStr.slice(func_split + 1)
         funcStr = 'function f(' + func_second

@@ -2,46 +2,51 @@ import React, { useState } from 'react'
 import { useRepo } from '../../contexts/RepoProvider'
 import { useNavigate } from 'react-router-dom'
 import Breadcrumbs, { BreadcrumbsItem } from '@atlaskit/breadcrumbs'
-import PatchViewer from '../../components/PatchViewer'
 import SingleViewer from '../../components/SingleViewer'
+import CodeViewer from '../../components/CodeViewer'
 
-// Potential bugs" title
-const Bugs = () => {
+// Complex, poorly design code might be vulnerable
+// Did
+// Like a hotspot
+const Vulnerabilities = () => {
     const [isViewerMode, setViewerMode] = useState(true)
 
     let { scan } = useRepo()
-    if (scan && Array.isArray(scan)) scan = scan.map(({ smells, main, vuln, ...keepAtrs }) => keepAtrs)
+    if (scan && Array.isArray(scan)) scan = scan.map(({ smells, main, bugs, ...keepAtrs }) => keepAtrs)
+    console.log(scan)
 
     const navigate = useNavigate()
 
     const breadcrumbs = (
         <Breadcrumbs>
             <BreadcrumbsItem text="Anlaysis" key="Analysis" onClick={() => navigate('/overview')} />
-            <BreadcrumbsItem text="Bugs" key="Bugs" onClick={() => {}} />
+            <BreadcrumbsItem text="Vulnerabilities" key="Vulnerabilities" onClick={() => {}} />
         </Breadcrumbs>
     )
 
     const [details, setDetails] = useState({
-        lines: [],
-        patches: [],
+        title: 'Vulnerable hotspot report',
+        desc: 'These function definitions are poorly designed and overly complex, please re-check these areas to ensure there are no vulnerabilities',
+        content: '',
         path: '',
+        lines: [], // start, end
+        names: [],
     })
 
     const onViewDetails = path => {
-        const bugObj = scan.filter(s => s.path === path)[0]
-        const bugs = bugObj.bugs
-        const lines = bugs.map(i => {
+        const vulnObj = scan.filter(s => s.path === path)[0]
+        const vuln = vulnObj.vuln
+        const lines = vuln.map(i => {
             return {
                 start: i.start,
                 end: i.end,
             }
         })
-        const patches = bugs.map(i => i.patch)
         setDetails({
+            ...details,
             lines: lines,
-            patches: patches,
             path: path,
-            content: bugObj.content,
+            content: vulnObj.content,
         })
         setViewerMode(false)
         window.scrollTo(0, 0)
@@ -53,16 +58,16 @@ const Bugs = () => {
             header={'Potential bugs'}
             breadcrumbs={breadcrumbs}
             onClick={onViewDetails}
-            type={'bugs'}
+            type={'vuln'}
         />
     ) : (
-        <PatchViewer
+        <CodeViewer
             onBack={() => setViewerMode(true)}
             details={details}
-            title="Bug report"
-            desc="Some potential bugs were found in this file, within functions. Please review the function definitions highlighted below."
+            bread1="Vulnerabilities"
+            bread2="Report"
         />
     )
 }
 
-export default Bugs
+export default Vulnerabilities

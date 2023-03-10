@@ -7,14 +7,14 @@ import { CodeBlock } from '@atlaskit/code'
 import CrossIcon from '@atlaskit/icon/glyph/cross'
 import { N100 } from '@atlaskit/theme/colors'
 
-const CodeViewer = ({ onBack, details }) => {
+const CodeViewer = ({ onBack, details, bread1, bread2 }) => {
     const { title, desc, content, lines, names, path } = details
 
     const breadcrumbs = (
         <Breadcrumbs>
             <BreadcrumbsItem text="Anlaysis" key="Analysis" onClick={() => navigate('/overview')} />
-            <BreadcrumbsItem text="Code smells" key="Code smells" onClick={onBack} />
-            <BreadcrumbsItem text="Smell" key="Smell" onClick={() => {}} />
+            <BreadcrumbsItem text={bread1} key={bread1} onClick={onBack} />
+            <BreadcrumbsItem text={bread2} key={bread2} onClick={() => {}} />
         </Breadcrumbs>
     )
 

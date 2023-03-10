@@ -10,4 +10,9 @@ export default defineConfig({
             protocolImports: true,
         }),
     ],
+    build: {
+        commonjsOptions: {
+            esmExternals: true,
+        },
+    },
 })

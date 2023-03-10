@@ -38,15 +38,16 @@ const Search = () => {
             <Outer id="search-outer">
                 <h1 style={{ marginBottom: '0' }}>{constants.name}</h1>
                 <h3 style={{ fontWeight: 'normal', marginBottom: '12px', marginTop: '0px' }}>
-                    A hybrid automatic code review framework for JavaScript that combines pattern and learning-based approaches
+                    A hybrid automatic code review framework for JavaScript that combines pattern and
+                    learning-based approaches
                 </h3>
                 <SectionMessage title="Dev mode (scan GitHub repositories for review)">
                     <p style={{ margin: '0px' }}>
                         This is to test out the analytics while in development. Later version will include
                         support for pull request code reviews. Please enter a link of a GitHub project below
                         which includes .js files (for instance:{' '}
-                        <a href="about:blank" target="_blank">
-                            put link here
+                        <a href="https://github.com/MartinChavez/Javascript" target="_blank">
+                            MartinChavez/Javascript
                         </a>
                         )
                     </p>

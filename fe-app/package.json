@@ -29,6 +29,7 @@
     "@atlaskit/select": "^16.1.5",
     "@atlaskit/side-navigation": "^1.6.0",
     "@atlaskit/spinner": "^15.3.4",
+    "@atlaskit/tabs": "^13.3.12",
     "@atlaskit/tag": "^11.4.10",
     "@atlaskit/textfield": "^5.3.6",
     "@atlaskit/theme": "^12.2.9",

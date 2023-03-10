@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import { useRepo } from '../../contexts/RepoProvider'
 import Breadcrumbs, { BreadcrumbsItem } from '@atlaskit/breadcrumbs'
-import Viewer from '../../components/Viewer'
+import Viewer from '../../components/MultiViewer'
 import { useNavigate } from 'react-router-dom'
 import BulletListIcon from '@atlaskit/icon/glyph/bullet-list'
 import CodeViewer from '../../components/CodeViewer'
-import { useEffect } from 'react'
 
 const Smells = () => {
     const [isViewerMode, setViewerMode] = useState(true)
@@ -167,6 +166,7 @@ const Smells = () => {
             })
         }
         setViewerMode(false)
+        window.scrollTo(0, 0)
     }
 
     return isViewerMode ? (
@@ -180,7 +180,7 @@ const Smells = () => {
             onClick={onViewDetails}
         />
     ) : (
-        <CodeViewer onBack={() => setViewerMode(true)} details={details} />
+        <CodeViewer onBack={() => setViewerMode(true)} details={details} bread1="Smells" bread2="Report" />
     )
 }
 

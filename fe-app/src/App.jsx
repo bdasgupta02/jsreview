@@ -13,6 +13,8 @@ import Lozenge from '@atlaskit/lozenge'
 // Pages
 import Smells from './pages/Smells'
 import Maintainability from './pages/Maintainability'
+import Bugs from './pages/Bugs'
+import Vulnerabilities from './pages/Vulnerabilities'
 
 // if a repo isn't loaded in context -> redirect
 // add hash value to the title
@@ -180,7 +182,7 @@ const InnerRouter = () => {
                             path="/vulnerabilities"
                             element={
                                 <PrivateRoute>
-                                    <Incomplete />
+                                    <Vulnerabilities />
                                 </PrivateRoute>
                             }
                         />
@@ -204,7 +206,7 @@ const InnerRouter = () => {
                             path="/bugs"
                             element={
                                 <PrivateRoute>
-                                    <Incomplete />
+                                    <Bugs />
                                 </PrivateRoute>
                             }
                         />

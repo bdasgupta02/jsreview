@@ -17,13 +17,14 @@ const bugs = async content => {
                 if (pred === 'error') {
                     continue
                 }
-                const isBug = detectBug(pred, funcs[i].node)
-                console.log(isBug)
+                const withName = addFuncName(pred)
+                const isBug = detectBug(withName, funcs[i].node)
                 if (isBug) {
-                    result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
+                    const formatted = format(withName)
+                    if (formatted) result.push({ start: funcs[i].start, end: funcs[i].end, patch: formatted })
                 }
             } catch (eInner) {
-                console.log(`Error: ${eInner}`)
+                console.log(`Error in bugs: ${eInner}`)
             }
         }
         return result
@@ -33,8 +34,18 @@ const bugs = async content => {
     }
 }
 
+const format = code => {
+    try {
+        const parsed = acorn.parse(code, { ecmaVersion: 2022 })
+        const formatted = escodegen.generate(parsed)
+        return formatted
+    } catch (e) {
+        console.log(`Error in acorn parsing in bugs: ${e}`)
+        return null
+    }
+}
+
 function checkSyntax(code) {
-    const eslint = require('eslint')
     const CLIEngine = eslint.CLIEngine
     const cli = new CLIEngine({
         useEslintrc: false,
@@ -75,16 +86,19 @@ const getStructure = obj => {
     }
 }
 
-const detectBug = (s, b_ast) => {
-    // smaller will always be predicted
-
+const addFuncName = s => {
     s_split = s.indexOf('(')
     s_second = s.slice(s_split + 1)
     s = 'function f(' + s_second
+    return s
+}
+
+const detectBug = (s, b_ast) => {
+    // smaller will always be predicted
     const isValid = checkSyntax(s)
     if (!isValid) return false
 
-    const s_ast = getBlock(acorn.parse(s))
+    const s_ast = getBlock(acorn.parse(s, { ecmaVersion: 2022 }))
     const s_types = getStructure(s_ast)
     const b_types = getStructure(b_ast)
     const s_str = JSON.stringify(s_types)
