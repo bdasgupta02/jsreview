@@ -44,17 +44,7 @@ const getFiles = async (repoStr, user, repo, sha) => {
         result.push({ path: file.path, content })
         scanning[repoStr] = `Downloading file ${i + 1}/${jsFiles.length}..`
     }
-
-    // const promises = jsFiles.map(async file => {
-    //     const contentResp = await axios.get(
-    //         `https://api.github.com/repos/${user}/${repo}/contents/${file.path}?ref=${sha}`,
-    //         gh_header,
-    //     )
-    //     const contentData = contentResp.data
-    //     const content = Buffer.from(contentData.content, 'base64').toString('utf-8')
-    //     return { path: file.path, content }
-    // }) // POSSIBLE BUG (todomvc) - might be due to rate limit
-    // const result = await Promise.all(promises)
+    
     scanning[repoStr] = `All ${jsFiles.length} files downloaded..`
     fileCache[repoStr] = result
     return result

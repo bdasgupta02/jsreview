@@ -3,6 +3,7 @@ const walk = require('acorn-walk')
 const jsx = require('acorn-jsx')
 const escodegen = require('escodegen')
 const axios = require('axios')
+const eslint = require('eslint')
 
 const bugs = async content => {
     try {
@@ -16,8 +17,9 @@ const bugs = async content => {
                 if (pred === 'error') {
                     continue
                 }
-                const isMatch = matchFuncs(pred, funcs[i].node)
-                if (!isMatch) {
+                const isBug = detectBug(pred, funcs[i].node)
+                console.log(isBug)
+                if (isBug) {
                     result.push({ start: funcs[i].start, end: funcs[i].end, patch: pred })
                 }
             } catch (eInner) {
@@ -29,6 +31,18 @@ const bugs = async content => {
         console.log(`Error in bugs: ${e}`)
         return []
     }
+}
+
+function checkSyntax(code) {
+    const eslint = require('eslint')
+    const CLIEngine = eslint.CLIEngine
+    const cli = new CLIEngine({
+        useEslintrc: false,
+        rules: {},
+    })
+
+    const report = cli.executeOnText(code)
+    return report.errorCount === 0
 }
 
 const getBlock = func => {
@@ -50,7 +64,7 @@ const getStructure = obj => {
         const filtered = {}
         for (const key in obj) {
             const val = obj[key]
-            if (!val) continue
+            if (!val || key === 'loc') continue
             if (Array.isArray(val) || typeof val === 'object') {
                 filtered[key] = getStructure(val)
             } else if (key === 'type') {
@@ -61,21 +75,22 @@ const getStructure = obj => {
     }
 }
 
-const matchFuncs = (s, b_ast) => {
+const detectBug = (s, b_ast) => {
     // smaller will always be predicted
-    const removeSpaces = str => str.replace(/\s+/g, '')
 
-    s = removeSpaces(s)
     s_split = s.indexOf('(')
-    s_second = s.slice(func_split + 1)
+    s_second = s.slice(s_split + 1)
     s = 'function f(' + s_second
+    const isValid = checkSyntax(s)
+    if (!isValid) return false
 
     const s_ast = getBlock(acorn.parse(s))
     const s_types = getStructure(s_ast)
     const b_types = getStructure(b_ast)
     const s_str = JSON.stringify(s_types)
     const b_str = JSON.stringify(b_types)
-    return b_str.includes(s_str)
+    const isMatch = b_str.includes(s_str)
+    return !isMatch
 }
 
 const removeCurvyWrapper = code => {
@@ -119,13 +134,6 @@ function convToExpression(ast) {
         },
     })
     return ast
-}
-
-const matchDiff = (funcStr, predStr) => {
-    const removeSpaces = str => str.replace(/\s+/g, '')
-    const funcClean = removeSpaces(funcStr)
-    const predClean = removeSpaces(predStr)
-    return funcClean !== predClean
 }
 
 const predRefine = async tokenized => {

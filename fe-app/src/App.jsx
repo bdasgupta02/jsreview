@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute'
 import Lozenge from '@atlaskit/lozenge'
 // Pages
 import Smells from './pages/Smells'
+import Maintainability from './pages/Maintainability'
 
 // if a repo isn't loaded in context -> redirect
 // add hash value to the title
@@ -187,7 +188,7 @@ const InnerRouter = () => {
                             path="/maintainability"
                             element={
                                 <PrivateRoute>
-                                    <Incomplete />
+                                    <Maintainability />
                                 </PrivateRoute>
                             }
                         />

@@ -19,7 +19,8 @@ const RepoProvider = ({ children }) => {
     const [isPending, setPending] = useState(false)
 
     const [hasRepo, setHasRepo] = useState(false)
-    const [isScanInner, setScanInner] = useState({ // v2
+    const [isScanInner, setScanInner] = useState({
+        // v2
         bugs: false,
         smells: false,
         main: false,
@@ -37,7 +38,6 @@ const RepoProvider = ({ children }) => {
         // they will load automatically
         // set scan inner after initially checking gh, piece by piece according to the 4 endpoints
 
-
         try {
             while (true) {
                 const resp = await axios.get(`${url}/acr/all/${repo}`)
@@ -52,15 +52,23 @@ const RepoProvider = ({ children }) => {
                 } else {
                     setPending(false)
                     setHasRepo(true)
-                    setScan(data)
                     setSha(data.sha.slice(0, 8))
                     setRepo(repo)
                     setErr('Please wait.')
                     navigate('/smells')
+
+                    const fileList = []
+                    for (let i = 0; i < data.files.length; i++) {
+                        fileList.push({
+                            content: data.files[i].content,
+                            ...data.acr.acr[i],
+                        })
+                    }
+                    setScan(fileList)
                     return
                 }
 
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 1000))
             }
         } catch (e) {
             console.log('GitHub API server error: ' + e)
